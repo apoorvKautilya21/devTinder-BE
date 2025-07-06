@@ -54,21 +54,29 @@ app.delete('/user', async (req, res) => {
   }
 });
 
-app.patch('/user', async (req, res) => {
-  const id = req.body.userId;
+app.patch('/user/:userId', async (req, res) => {
+  const id = req.params.userId;
   const body = req.body;
 
   // body will have userId. But it will be ignored by the findByIdAndUpdate function
   // because this field is not present in the user model
   try {
+    const ALLOWED_UPDATES = ['firstName', 'lastName', 'age', 'gender', 'photoUrl', 'about', 'skills'];
+    const illegalUpdatedFields = Object.keys(body).filter(key => !ALLOWED_UPDATES.includes(key));
+
+    if (illegalUpdatedFields.length > 0) {
+      throw new Error(`Invalid updates: ${illegalUpdatedFields.join(', ')}`);
+    }
+
+    if (body?.skills?.length > 10) {
+      throw new Error('Skills cannot be more than 10');
+    }
+
     const user = await userModel.findByIdAndUpdate(id, body, {
       returnDocument: 'after',
       lean: true,
       runValidators: true,
     });
-
-    console.log(user);
-    console.log(typeof user);
 
     await res.send({message: 'User updated successfully', user});
   } catch (err) {
