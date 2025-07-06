@@ -11,8 +11,8 @@ app.post('/signup', async (req, res) => {
     await user.save();
 
     res.status(201).json({ message: 'User created successfully' });
-  } catch {
-    res.status(500).send('Internal Server Error');
+  } catch (err) {
+    res.status(500).send(err.message);
   }
 });
 
@@ -64,6 +64,7 @@ app.patch('/user', async (req, res) => {
     const user = await userModel.findByIdAndUpdate(id, body, {
       returnDocument: 'after',
       lean: true,
+      runValidators: true,
     });
 
     console.log(user);
@@ -71,7 +72,7 @@ app.patch('/user', async (req, res) => {
 
     await res.send({message: 'User updated successfully', user});
   } catch (err) {
-    res.status(400).send('Internal Server Error');
+    res.status(400).send(err.message);
   }
 });
 
