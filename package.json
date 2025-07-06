@@ -1,0 +1,23 @@
+{
+  "name": "devtinder-be",
+  "version": "1.0.0",
+  "description": "Dev tinder",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [
+    "JS",
+    "NodeJS",
+    "Mongoose",
+    "express"
+  ],
+  "author": "Apoorv Kautilya",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.1"
+  }
+}
