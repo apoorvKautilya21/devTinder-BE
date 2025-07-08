@@ -4,7 +4,6 @@ const userModel = require('./models/user');
 const app = express();
 const { validateSignup } = require('./utils/validation');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { userAuth } = require('./middleware/auth');
 
@@ -47,16 +46,19 @@ app.post('/login', async (req, res) => {
       throw new Error('Invalida credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }
 
     // Generate a JWT token
-    const jwtToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    const jwtToken = await user.getJWT();
     
     // Send the token via cookie
-    res.cookie("token", jwtToken);
+    res.cookie("token", jwtToken, {
+      // httpOnly: true,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
 
     res.send({ message: 'Login successful' });
   } catch (err) {
@@ -72,73 +74,14 @@ app.get('/profile', userAuth, async (req, res) => {
   }
 });
 
-// get user by emailId
-app.get('/user', async (req, res) => {
-  const emailId = req.body.emailId;
+app.get('/sendConnectionRequest', userAuth, async (req, res) => {
   try {
-    const users = await userModel.find({ emailId });
-    if (users.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
-    } else {
-      res.send({user: users[0]});
-    }
+    const user = req.user;
+    res.send({message: `${user.firstName} sent you a connection request`});
   } catch (err) {
-    res.status(400).send('Internal Server Error');
+    res.status(400).send({message: err.message});
   }
-});
-
-// FEED API /feed (GET) - get all users from the database
-app.get('/feed', async(req, res) => {
-  try {
-    const users = await userModel.find({});
-
-    res.send(users);
-  } catch (err) {
-    res.status(400).send('Internal Server Error');
-  }
-});
-
-app.delete('/user', async (req, res) => {
-  const id = req.body.userId;
-
-  try {
-    await userModel.findByIdAndDelete(id);
-
-    await res.send({message: 'User deleted successfully'});
-  } catch (err) {
-    res.status(400).send('Internal Server Error');
-  }
-});
-
-app.patch('/user/:userId', async (req, res) => {
-  const id = req.params.userId;
-  const body = req.body;
-
-  // body will have userId. But it will be ignored by the findByIdAndUpdate function
-  // because this field is not present in the user model
-  try {
-    const ALLOWED_UPDATES = ['firstName', 'lastName', 'age', 'gender', 'photoUrl', 'about', 'skills'];
-    const illegalUpdatedFields = Object.keys(body).filter(key => !ALLOWED_UPDATES.includes(key));
-
-    if (illegalUpdatedFields.length > 0) {
-      throw new Error(`Invalid updates: ${illegalUpdatedFields.join(', ')}`);
-    }
-
-    if (body?.skills?.length > 10) {
-      throw new Error('Skills cannot be more than 10');
-    }
-
-    const user = await userModel.findByIdAndUpdate(id, body, {
-      returnDocument: 'after',
-      lean: true,
-      runValidators: true,
-    });
-
-    await res.send({message: 'User updated successfully', user});
-  } catch (err) {
-    res.status(400).send(err.message);
-  }
-});
+})
 
 try {
   connectDB()
