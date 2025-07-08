@@ -4,8 +4,12 @@ const userModel = require('./models/user');
 const app = express();
 const { validateSignup } = require('./utils/validation');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const { userAuth } = require('./middleware/auth');
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signup', async (req, res) => {
   try {
@@ -48,9 +52,23 @@ app.post('/login', async (req, res) => {
       throw new Error('Invalid credentials');
     }
 
+    // Generate a JWT token
+    const jwtToken = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    
+    // Send the token via cookie
+    res.cookie("token", jwtToken);
+
     res.send({ message: 'Login successful' });
   } catch (err) {
     res.status(400).send(err.message);
+  }
+});
+
+app.get('/profile', userAuth, async (req, res) => {
+  try {
+    res.send(req.user);
+  } catch (err) {
+    res.status(400).send({message: err.message});
   }
 });
 
