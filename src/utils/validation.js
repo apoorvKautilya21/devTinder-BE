@@ -14,6 +14,15 @@ const validateSignup = (data) => {
   }
 };
 
+const validateProfileEdit = (data) => {
+  const fieldsThatCanBeUpdated = ['firstName', 'lastName', 'skills', 'about', 'photoUrl', 'age', 'gender'];
+
+  const isUpdateValid = Object.keys(data || {}).every(field => fieldsThatCanBeUpdated.includes(field));
+
+  return isUpdateValid;
+}
+
 module.exports = {
   validateSignup,
+  validateProfileEdit,
 };
