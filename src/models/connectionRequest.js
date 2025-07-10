@@ -73,4 +73,13 @@ connectionRequestSchema.pre('save', function(next) {
 
 const ConnectionRequestModel = mongoose.model('ConnectionRequest', connectionRequestSchema);
 
+// Print indexes - use collection.getIndexes() or listIndexes()
+// ConnectionRequestModel.collection.getIndexes((err, indexes) => {
+//   if (err) {
+//     console.log('Error getting indexes:', err);
+//   } else {
+//     console.log('ConnectionRequest indexes:', indexes);
+//   }
+// });
+
 module.exports = ConnectionRequestModel;
