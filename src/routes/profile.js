@@ -21,7 +21,7 @@ profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
     const isUpdateValid = validateProfileEdit(req.body);
     if (!isUpdateValid) throw new Error('Invalid update');
 
-    req.body?.forEach?.(field => {
+    Object.keys(req.body || {}).forEach(field => {
       user[field] = req.body[field];
     });
 
