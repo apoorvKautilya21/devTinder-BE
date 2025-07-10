@@ -16,7 +16,7 @@
 - POST /request/review/accepted/:requestId -> /request/review/:status/:requestId
 - POST /request/review/rejected/:requestId -> /request/review/:status/:requestId
 
-## userRoutwer
+## userRouter
 - GET /user/connections
-- GET /user/requests/recieved
+- GET /user/requests/received
 - GET /user/feed
