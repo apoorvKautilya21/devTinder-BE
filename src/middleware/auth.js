@@ -4,7 +4,7 @@ const userModel = require('../models/user');
 const userAuth = async (req, res, next) => {
   try {
     const token = req.cookies?.token;
-    if (!token) throw new Error('Please login to access this resource');
+    if (!token) return res.status(401).send({message: 'Please login to access this resource'});
 
     const decodeData = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decodeData?._id;
@@ -16,6 +16,7 @@ const userAuth = async (req, res, next) => {
 
     next();
   } catch (err) {
+    console.log(err);
     res.status(400).send({message: err.message});
   }
 }
